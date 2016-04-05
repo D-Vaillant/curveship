@@ -1,4 +1,4 @@
-'Carry out directives such as save, restore, and quit.'
+"""Carry out directives such as save, restore, and quit."""
 
 __author__ = 'Nick Montfort'
 __copyright__ = 'Copyright 2011 Nick Montfort'
@@ -9,6 +9,7 @@ __status__ = 'Development'
 import os
 import pickle
 import re
+from importlib import import_module
 
 import discourse_model
 import microplanner
@@ -129,20 +130,27 @@ class StartupError(Exception):
 def load_file(file_name, required, defaults, module_type):
     """Loads either an interactive fiction or a spin file.
 
-    Improved filename parsing thanks to Max Battcher."""
-    dirname, _ = os.path.splitext(file_name)
+    Improved filename parsing thanks to Max Battcher.
+
+    'file_name': The name of a module (IF or spin file).
+    'required': A List of required attributes we want from the file_name.
+    'defaults': Attributes which we fill in if they're missing.
+    'module_type': Doesn't look like it actually does anything useful.
+    """
+    dirname, _ = os.path.splitext(file_name) # (/dir1/dir2/filename, .ext)
     pieces = []
     while dirname:
-        dirname, basename = os.path.split(dirname)
-        if basename:
+        dirname, basename = os.path.split(dirname) # /dir1/dir2, filename
+        if basename: # nonempty
             pieces.append(basename)
         else:
-            break
-    pieces.reverse()
-    module_name = '.'.join(pieces)
+            break # break if empty. makes sense
+    pieces.reverse() # put it in order; [dir1, dir2, filename]
+    module_name = '.'.join(pieces) # make it into a module!
     try:
-        mod = __import__(module_name, globals(), locals(), required, -1)
-        for attr in required:
+        mod = import_module(module_name)
+        # mod = __import__(module_name, globals(), locals(), required, -1)
+        for attr in required: # required
             if not hasattr(mod, attr):
                 msg = ('This is not a complete fiction file: "' + attr +
                        '" is a required attribute, but the ' + module_type +
@@ -152,7 +160,7 @@ def load_file(file_name, required, defaults, module_type):
             module = __import__(module_name, globals(), locals(), [attr])
             if not hasattr(module, attr):
                 setattr(module, attr, default)
-    except ImportError, err:
+    except ImportError as err:
         msg = ('Unable to open '+ module_type + ' module "' + module_name +
                '" due to this error: ' + str(err))
         raise StartupError(msg)
@@ -161,11 +169,13 @@ def load_file(file_name, required, defaults, module_type):
 
 def load_fiction(file_name, required, defaults):
     'Loads a fiction file.'
+    # Basically just a wrapper for load_file, made easier just for fictions.
     fiction = load_file(file_name, required, defaults, 'interactive fiction')
     return fiction
 
 def load_spin(existing_spin, spin_file):
     'Loads one spin file and returns an updated spin.'
+    # Loads the spin file and calls update_spin.
     new_file = load_file(spin_file, [], discourse_model.SPIN_DEFAULTS, 'spin')
     if hasattr(new_file, 'spin'):
         existing_spin = update_spin(existing_spin, new_file.spin)
@@ -498,7 +508,7 @@ def narrating_uses(tokens, world, discourse):
             new_spin = load_spin(discourse.spin, spin_file)
             discourse.spin.update(new_spin)
             report_text = report('uses', tokens[2])
-        except StartupError, err:
+        except StartupError as err:
             report_text = str(err) + '. ' + report('uses_usage')
     return (report_text, world, discourse)
 

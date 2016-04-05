@@ -4,7 +4,7 @@
 __author__ = 'Nick Montfort'
 __copyright__ = 'Copyright 2011 Nick Montfort'
 __license__ = 'ISC'
-__version__ = '0.5.0.0'
+__version__ = '0.5.0.1'
 __status__ = 'Development'
 
 import sys
@@ -23,30 +23,35 @@ import recognizer
 import reply_planner
 import world_model
 
+# Streams are just those IO objects - sys.out is generally the only one we care about.
 class Multistream(object):
     'Encapsulates multiple output streams.'
 
     def __init__(self, streams, log=None):
         self.streams = streams
-        self.log = log
+        self.log = log # Wonder when this gets used?
 
     def close(self):
         """Close each of the streams.
 
         If one or more of the streams returns some exit status, the maximum
         value is returned by this method."""
+        # Points to a system where exit statuses are important, and streams
+        # can be "closed" and fail to do so.
         overall_status = None
+
         for stream in self.streams:
             status = stream.close()
             if status is not None:
                 overall_status = max(overall_status, status)
         return overall_status
 
+    # Streams can be written to!
     def write(self, string):
         'Write string to each of the streams.'
         for stream in self.streams:
             stream.write(string)
-
+# Class basically lets you quantify over streams and write to or close them together.
 
 def start_log(out_streams):
     'Open a log file named with the next available integer.'
@@ -57,9 +62,10 @@ def start_log(out_streams):
     else:
         latest = max([int(log_file) for log_file in log_files])
     log_file = 'logs/' + str(latest + 1) + '.log'
+    # log_file = 'logs/{}.log'.format(latest+1)
     try:
-        log = file(log_file, 'w')
-    except IOError, err:
+        log = open(log_file, 'w')
+    except IOError as err:
         msg = ('Unable to open log file "' + log_file + '" for ' +
                'writing due to this error: ' + str(err))
         raise joker.StartupError(msg)
@@ -76,9 +82,11 @@ def initialize(if_file, spin_files, out_streams):
     'Load all files and present the header and prologue.'
     for startup_string in joker.session_startup(__version__):
         presenter.center(startup_string, out_streams)
+    # Joker loads up the fiction using the if_file.
     fiction = joker.load_fiction(if_file, ['discourse', 'items'],
                                  discourse_model.FICTION_DEFAULTS)
     presenter.center('fiction: ' + if_file, out_streams)
+    # Builds the world using Joker's fiction.
     world = world_model.World(fiction)
     world.set_concepts(fiction.concepts)
     for i in dir(fiction):
@@ -231,9 +239,11 @@ def main(argv, in_stream=sys.stdin, out_stream=sys.stdout):
     "Set up a session and run Curveship's main loop."
     return_code = 0
     try:
+        # Allows for there to be multiple outputs. sys.stdout is the default.
         out_streams = Multistream([out_stream])
         opts, args = parse_command_line(argv)
         out_streams = start_log(out_streams)
+        # initialize("fiction.py", [spin1.py, spin2.py...], out_streams)
         world, discourse = initialize(args[0], args[1:], out_streams)
         discourse.debug = opts.debug
         if opts.autofile is not None:
@@ -252,13 +262,13 @@ def main(argv, in_stream=sys.stdin, out_stream=sys.stdout):
             world, discourse = each_turn(world, discourse, in_stream,
                                          out_streams)
             out_streams.log.write('#' + str(time.time() - previous_time))
-    except joker.StartupError, err:
+    except joker.StartupError as err:
         presenter.present(err.msg, Multistream([sys.stderr]))
         return_code = 2
-    except KeyboardInterrupt, err:
+    except KeyboardInterrupt as err:
         presenter.present('\n', out_streams)
         return_code = 2
-    except EOFError, err:
+    except EOFError as err:
         presenter.present('\n', out_streams)
         return_code = 2
     finally:

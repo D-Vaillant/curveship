@@ -94,6 +94,7 @@ def set_features(item, category, keywords):
     glow: float
         How much light the item is radiating, typically in (0, 1).
         Can be set outside of (0, 1) for supernatural reasons.
+        Q: What do light levels > 1 mean?
 
     number: 'singular' | 'plural'
         Whether the item should be referred to in the singular or plural.
@@ -171,23 +172,31 @@ class Item(object):
             raise StandardError('Attempt in Item "' + self._tag +
                   '" to instantiate abstract base class world_model.Item')
         if tag_and_parent == '@cosmos':
+            # If tag is @cosmos, no link and no parent.
             self._tag = tag_and_parent
             (self.link, self.parent) = (None, None)
         else:
+            # Otherwise, tag_and_parent gets split!
             (self._tag, self.link, self.parent) = tag_and_parent.split()
         if (not type(self._tag) == types.StringType) or len(self._tag) == 0:
+            # Type-checking, making sure that the tag is string-like.
+            # Also makes sure tag is not ''.
             raise StandardError('An Item lacking a "tag" attribute, ' +
              'or with a non-string or empty tag, has been specified. A ' +
              'valid tag is required for each item.')
         if not re.match('@[a-z0-9_]{2,30}', self._tag):
+            # Syntax checking. Tags are @[a-z0-9_]{2,30}.
             raise StandardError('The tag "' + self._tag +
              '" is invalid. Tags start with "@" and otherwise consist of ' +
              '2-30 characters which are only lowercase letters, numerals, ' +
              'and underscores.')
         self._children = []
         for i in ['actor', 'door', 'room', 'thing', 'substance']:
+            # A strange way of setting self.`category` = True and the others
+            #   to be false. There's gotta be a better way...
             setattr(self, i, (category == i))
         self.blanked = False
+
         # Five of these features have to be set "manually" (private properties
         # set directly) now because their setters depend on each other.
         #
@@ -204,18 +213,26 @@ class Item(object):
         self._referring_extra = '|'
         self._qualities = []
         self._referring = (set(), set(), set())
+
+        # Wait, are there different modalities for perception?
+        # That is really cool. I was assuming only sight.
+        #   This lets you create "dark rooms" which you can interact with
+        #   without having to change any properties of the objects.
         self._sense = {}
         for sense in ['sight', 'touch', 'hearing', 'smell', 'taste']:
             setattr(self, sense, '')
         self = set_features(self, category, keywords)
 
     def __str__(self):
+        # The string-representation of an Item is its tag.
+        # Perhaps tags are unique? Semi-unique?
         return self._tag
 
     def __eq__(self, item):
         if item is None:
             return False
         if type(item) == types.StringType:
+            # Basically if you're asking if Item == @tag.
             return str(self) == item
         self_list = [str(self), self.article, self.called]
         item_list = [str(item), item.article, item.called]

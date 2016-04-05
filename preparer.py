@@ -1,4 +1,6 @@
-'Tokenize input text for the Recognizer.'
+"""Tokenize input text for the Recognizer."""
+
+from __future__ import print_function
 
 __author__ = 'Nick Montfort'
 __copyright__ = 'Copyright 2011 Nick Montfort'
@@ -52,5 +54,5 @@ def tokenize(input_string, separator):
 
 if __name__ == "__main__":
     TEST_INPUT = prepare()
-    print TEST_INPUT.tokens
+    print(TEST_INPUT.tokens)
 
