@@ -22,7 +22,9 @@ class SpecialTime(object):
 
     def __cmp__(self, other):
         if isinstance(other, self.__class__):
-            return cmp(self._comparator, other._comparator)
+            # Python 3 compatibility.
+            return (self._comparator > other._comparator) - (self._comparator < other._comparator)
+            # return cmp(self._comparator, other._comparator)
         return self._comparator
 
     def __repr__(self):
@@ -290,7 +292,7 @@ class Discourse(object):
         'Creates an English list, delimited and conjoined as specified.'
         for i in range(0, len(phrases)):
             # Convert any integers in the list to strings here
-            if type(phrases[i]) == types.IntType:
+            if isinstance(phrases[i], int):
                 phrases[i] = str(phrases[i])
         if len(phrases) >= 2:
             phrases[-1] = conjunction + ' ' + phrases[-1]

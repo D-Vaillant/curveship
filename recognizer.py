@@ -84,7 +84,7 @@ def nonterminal(nonterm, discourse, concept):
             rooms_visible = concept.item[str(agent_room)].connects
         else:
             rooms_visible = agent_room.view.keys()
-        for room in [str(agent_room)] + rooms_visible:
+        for room in [str(agent_room)] + list(rooms_visible):
             for i in [room] + concept.descendants(room):
                 phrases.append((noun_phrase(concept.item[i], discourse), i))
     return phrases

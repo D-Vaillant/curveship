@@ -178,6 +178,9 @@ def simulator(user_input, world, commanded, actions_to_do=None):
     'Simulate the IF world using the Action from user input.'
     if actions_to_do is None:
         actions_to_do = []
+    else:
+        actions_to_do = list(actions_to_do) # Python3 compatibility
+
     done_list = []
     start_time = world.ticks
     for tag in world.item:

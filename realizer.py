@@ -202,7 +202,7 @@ class Sentence(object):
         subjects, tf = (), False
         for part in self.parts:
             more = ''
-            if type(part) is types.StringType:
+            if isinstance(part, str):
                 if part == '[begin-caps]':
                     all_caps = True
                 elif part == '[end-caps]':

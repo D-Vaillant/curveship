@@ -166,7 +166,7 @@ class Wanderer(Actor):
 
     def act(self, command_map, concept):
         if random.random() < self.walk_probability:
-            way = random.choice(self.place(concept).exits.keys())
+            way = random.choice(list(self.place(concept).exits.keys()))
             return [self.do_command(['leave', way], command_map, concept)]
         return []
 

@@ -21,8 +21,11 @@ def prepare(separator, prompt='', in_stream=sys.stdin, out_stream=sys.stdout):
     """Read a string from the input string and return it tokenized.
 
     Andrew Plotkin fixed this so that up arrow fetches the previous command."""
+    global input
     if (hasattr(in_stream, 'isatty') and in_stream.isatty()):
-        input_string = raw_input(prompt)
+        try: input = raw_input
+        except NameError: pass
+        input_string = input(prompt)
     else:
         out_stream.write(prompt)
         input_string = in_stream.readline()

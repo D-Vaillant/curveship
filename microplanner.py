@@ -108,7 +108,7 @@ def name_room(node, tense_er, tense_rs, concept_now, discourse):
 
 def select(string_or_list):
     'Return a string, either the one passed or a random element from a list.'
-    if type(string_or_list) == types.StringType:
+    if isinstance(string_or_list, str):
         return string_or_list
     else:
         return random.choice(string_or_list)

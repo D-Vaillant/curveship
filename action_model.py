@@ -24,7 +24,7 @@ class Action(object):
         if self.__class__ == Action:
             raise StandardError('Attempt to instantiate abstract base ' +
                                 'class action_model.Action')
-        self.id = ACTION_ID.next()
+        self.id = next(ACTION_ID)
         self.verb = verb
         self.agent = agent
         self.cause = self.agent

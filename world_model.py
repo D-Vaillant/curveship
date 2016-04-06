@@ -363,7 +363,7 @@ class World(WorldOrConcept):
                 rooms_visible = self.item[str(actor_place)].connects
             else:
                 rooms_visible = actor_place.view.keys()
-            for room_tag in [str(actor_place)] + rooms_visible:
+            for room_tag in [str(actor_place)] + list(rooms_visible):
                 view_tags += ([room_tag] + 
                                self.descendants(room_tag, stop='opaque'))
         if tag not in view_tags:

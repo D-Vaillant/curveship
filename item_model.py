@@ -178,7 +178,7 @@ class Item(object):
         else:
             # Otherwise, tag_and_parent gets split!
             (self._tag, self.link, self.parent) = tag_and_parent.split()
-        if (not type(self._tag) == types.StringType) or len(self._tag) == 0:
+        if (not isinstance(self._tag, str)) or len(self._tag) == 0:
             # Type-checking, making sure that the tag is string-like.
             # Also makes sure tag is not ''.
             raise StandardError('An Item lacking a "tag" attribute, ' +
@@ -231,8 +231,7 @@ class Item(object):
     def __eq__(self, item):
         if item is None:
             return False
-        if type(item) == types.StringType:
-            # Basically if you're asking if Item == @tag.
+        if isinstance(item, str):
             return str(self) == item
         self_list = [str(self), self.article, self.called]
         item_list = [str(item), item.article, item.called]
@@ -478,7 +477,7 @@ class Actor(Item):
 
     def do_command(self, command_words, command_map, concept):
         'Return the Action that would result from the provided command.'
-        if type(command_words) == types.StringType:
+        if isinstance(command_words, str):
             command_words = command_words.split()
         head = command_words[0].lower()
         if not hasattr(command_map, head):
